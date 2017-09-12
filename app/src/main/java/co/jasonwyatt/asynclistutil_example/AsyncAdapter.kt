@@ -8,16 +8,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 
 class AsyncAdapter(itemSource: ItemSource, recyclerView: RecyclerView) : RecyclerView.Adapter<ViewHolder>() {
-    private val viewCallback = ViewCallback(recyclerView)
     private val dataCallback = DataCallback(itemSource)
-    private val listUtil = AsyncListUtil(Item::class.java, 500, dataCallback, viewCallback)
+    private val listUtil = AsyncListUtil(Item::class.java, 500, dataCallback, ViewCallback(recyclerView))
     private val onScrollListener = ScrollListener(listUtil)
 
     fun onStart(recyclerView: RecyclerView?) {
-        if (recyclerView == null) {
-            return
-        }
-        recyclerView.addOnScrollListener(onScrollListener)
+        recyclerView?.addOnScrollListener(onScrollListener)
         listUtil.refresh()
     }
 
