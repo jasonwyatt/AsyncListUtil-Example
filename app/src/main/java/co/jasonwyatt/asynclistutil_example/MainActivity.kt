@@ -2,16 +2,13 @@ package co.jasonwyatt.asynclistutil_example
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.util.AsyncListUtil
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var listUtil: AsyncListUtil<Item>
-    private lateinit var dataCallback: MyDataCallback
-    private lateinit var viewCallback: MyViewCallback
-    private lateinit var adapter: Adapter
+    private lateinit var adapter: AsyncAdapter
+    private lateinit var itemSource: SQLiteItemSource
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,22 +16,21 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler)
 
+        itemSource = SQLiteItemSource(getDatabase(this, "database.sqlite"))
+        adapter = AsyncAdapter(itemSource, recyclerView)
+
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-
-        dataCallback = MyDataCallback(this, "database.sqlite")
-        viewCallback = MyViewCallback(recyclerView)
-
-        listUtil = AsyncListUtil(Item::class.java, 100, dataCallback, viewCallback)
-
-        adapter = Adapter(listUtil)
-
         recyclerView.adapter = adapter
-        recyclerView.addOnScrollListener(AsyncListScrollListener(listUtil))
+    }
+
+    override fun onStart() {
+        super.onStart()
+        adapter.onStart(recyclerView)
     }
 
     override fun onStop() {
         super.onStop()
-        dataCallback.tearDown()
+        adapter.onStop(recyclerView)
     }
 }
 
